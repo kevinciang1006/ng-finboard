@@ -1,0 +1,76 @@
+:host {
+  display: block;
+}
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+// ─── Filter Bar ───────────────────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-toggle {
+  flex-shrink: 0;
+
+  .mat-button-toggle {
+    font-size: 0.85rem;
+  }
+}
+
+.search-field {
+  flex: 1;
+  min-width: 220px;
+  max-width: 420px;
+}
+
+// ─── Summary Row ──────────────────────────────────────────────────────────────
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.summary-stat {
+  strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}
+
+.summary-divider {
+  opacity: 0.4;
+}
+
+.amount-positive strong { color: #16a34a; }
+.amount-negative strong { color: #dc2626; }

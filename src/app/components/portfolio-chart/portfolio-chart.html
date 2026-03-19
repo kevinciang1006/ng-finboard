@@ -1,0 +1,26 @@
+<div class="chart-card">
+  <div class="chart-header">
+    <div>
+      <h3 class="chart-title">Portfolio Performance</h3>
+      <p class="chart-subtitle">Monthly value over time</p>
+    </div>
+
+    <mat-button-toggle-group
+      class="range-toggle"
+      [value]="selectedRange()"
+      (change)="setRange($event.value)">
+      @for (range of rangeOptions; track range) {
+        <mat-button-toggle [value]="range">{{ range }}</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="chart-canvas-wrapper">
+    <canvas
+      baseChart
+      [data]="filteredData()"
+      [options]="chartOptions"
+      type="line">
+    </canvas>
+  </div>
+</div>

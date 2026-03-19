@@ -1,0 +1,58 @@
+<div class="page-layout">
+
+  <!-- ── Page Header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Transactions</h1>
+      <p class="page-subtitle">Browse, search and filter all financial transactions</p>
+    </div>
+  </div>
+
+  <!-- ── Filter Bar ───────────────────────────────────────────── -->
+  <div class="filter-bar">
+
+    <mat-button-toggle-group
+      class="status-toggle"
+      [value]="selectedStatus()"
+      (change)="selectedStatus.set($event.value)"
+      aria-label="Filter by status">
+      <mat-button-toggle value="all">All</mat-button-toggle>
+      <mat-button-toggle value="completed">Completed</mat-button-toggle>
+      <mat-button-toggle value="pending">Pending</mat-button-toggle>
+      <mat-button-toggle value="failed">Failed</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Search transactions</mat-label>
+      <input
+        matInput
+        type="search"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Description or category…"
+        aria-label="Search transactions" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+  </div>
+
+  <!-- ── Summary Stats ────────────────────────────────────────── -->
+  <div class="summary-row" role="status" aria-live="polite">
+    <span class="summary-stat">
+      <strong>{{ totalCount() }}</strong> transaction{{ totalCount() === 1 ? '' : 's' }}
+    </span>
+    <span class="summary-divider" aria-hidden="true">·</span>
+    <span
+      class="summary-stat"
+      [class.amount-positive]="totalAmount() >= 0"
+      [class.amount-negative]="totalAmount() < 0">
+      Net: <strong>{{ totalAmount() | currency:'USD':'symbol':'1.2-2' }}</strong>
+    </span>
+  </div>
+
+  <!-- ── Transaction Table ────────────────────────────────────── -->
+  <app-transaction-table
+    [transactions]="filteredTransactions()"
+    (rowClicked)="onRowClicked($event)" />
+
+</div>

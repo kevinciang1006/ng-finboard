@@ -1,0 +1,69 @@
+<mat-sidenav-container class="shell-container">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <mat-sidenav
+    class="sidenav"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="sidenavOpened()">
+
+    <div class="sidenav-brand">
+      <mat-icon class="brand-icon">bar_chart</mat-icon>
+      <span class="brand-name">FinBoard</span>
+    </div>
+
+    <nav class="sidenav-nav" aria-label="Main navigation">
+      <mat-nav-list>
+        @for (item of navItems; track item.route) {
+          <a
+            mat-list-item
+            class="nav-item"
+            [routerLink]="item.route"
+            routerLinkActive="nav-item-active"
+            [routerLinkActiveOptions]="{ exact: item.exactMatch }"
+            [attr.aria-label]="item.label">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </nav>
+
+    <div class="sidenav-footer">
+      <span class="version-badge">v1.0.0-demo</span>
+    </div>
+  </mat-sidenav>
+
+  <!-- ── Main Content ───────────────────────────────────────────── -->
+  <mat-sidenav-content class="shell-content">
+
+    <!-- Top Toolbar -->
+    <mat-toolbar class="topbar" role="banner">
+      <button
+        mat-icon-button
+        class="menu-btn"
+        aria-label="Toggle navigation menu"
+        (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="topbar-title">{{ pageTitle() }}</span>
+
+      <span class="topbar-spacer"></span>
+
+      <div
+        class="user-avatar"
+        role="img"
+        [matTooltip]="'Demo User · ' + (themeService.isDark() ? 'Dark' : 'Light') + ' mode'"
+        aria-label="Demo User avatar">
+        KC
+      </div>
+    </mat-toolbar>
+
+    <!-- Lazy-loaded page content -->
+    <main class="main-content" id="main-content">
+      <router-outlet />
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

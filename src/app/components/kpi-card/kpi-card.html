@@ -1,0 +1,23 @@
+<mat-card class="kpi-card" appearance="outlined">
+  <mat-card-content>
+    <p class="kpi-label">{{ label() }}</p>
+
+    <p class="kpi-value">
+      @if (prefix()) {
+        <span class="kpi-prefix">{{ prefix() }}</span>
+      }
+      {{ formatValue(value()) }}
+    </p>
+
+    <div
+      class="kpi-delta"
+      [class.delta-positive]="isPositiveDelta()"
+      [class.delta-negative]="!isPositiveDelta()">
+      <mat-icon class="trend-icon">
+        {{ isPositiveDelta() ? 'trending_up' : 'trending_down' }}
+      </mat-icon>
+      <span>{{ isPositiveDelta() ? '+' : '' }}{{ delta() }}%</span>
+      <span class="delta-label">vs last period</span>
+    </div>
+  </mat-card-content>
+</mat-card>

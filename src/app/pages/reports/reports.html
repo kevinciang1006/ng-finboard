@@ -1,0 +1,92 @@
+<div class="page-layout">
+
+  <!-- ── Page Header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Reports</h1>
+      <p class="page-subtitle">Generate, manage, and download financial reports</p>
+    </div>
+    <button mat-flat-button (click)="addReport()" aria-label="Generate new report">
+      <mat-icon>add</mat-icon>
+      Generate New Report
+    </button>
+  </div>
+
+  <!-- ── KPI Cards ────────────────────────────────────────────── -->
+  <div class="kpi-grid">
+    @for (kpi of kpiCards; track kpi.label) {
+      <app-kpi-card
+        [label]="kpi.label"
+        [value]="kpi.value"
+        [delta]="kpi.delta">
+      </app-kpi-card>
+    }
+  </div>
+
+  <!-- ── Reports Table ────────────────────────────────────────── -->
+  <div class="table-container">
+    <mat-table [dataSource]="tableDataSource" class="reports-table" aria-label="Reports list">
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <span class="report-id">{{ row.id }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Report Name</mat-header-cell>
+        <mat-cell *matCellDef="let row" class="name-cell">{{ row.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Period Column -->
+      <ng-container matColumnDef="period">
+        <mat-header-cell *matHeaderCellDef>Period</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.period }}</mat-cell>
+      </ng-container>
+
+      <!-- Generated Date Column -->
+      <ng-container matColumnDef="generated_date">
+        <mat-header-cell *matHeaderCellDef>Generated</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.generated_date | date:'MMM d, y' }}</mat-cell>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <mat-chip disableRipple [class]="statusClass(row.status)">
+            {{ row.status }}
+          </mat-chip>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let row" class="actions-cell">
+          @if (row.status === 'ready') {
+            <button
+              mat-icon-button
+              [matTooltip]="'Download ' + row.name"
+              [attr.aria-label]="'Download ' + row.name"
+              (click)="downloadReport(row)">
+              <mat-icon>download</mat-icon>
+            </button>
+          } @else {
+            <button mat-icon-button disabled aria-label="Report is processing">
+              <mat-icon class="spin-icon">sync</mat-icon>
+            </button>
+          }
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;" class="report-row"></mat-row>
+
+    </mat-table>
+  </div>
+
+</div>

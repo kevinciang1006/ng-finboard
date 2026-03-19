@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+// ─── KPI Grid ─────────────────────────────────────────────────────────────────
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.table-container {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+
+  mat-table {
+    background: var(--color-surface);
+    width: 100%;
+  }
+
+  mat-header-cell {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  mat-cell {
+    color: var(--color-text);
+  }
+
+  .report-row {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-surface-alt);
+    }
+  }
+}
+
+.report-id {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.name-cell {
+  font-weight: 500;
+}
+
+.actions-cell {
+  justify-content: flex-end;
+}
+
+// Status chips (reuse same pattern as transaction table)
+mat-chip {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  min-height: 24px !important;
+  padding: 0 10px !important;
+
+  &.chip-completed {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+  }
+
+  &.chip-pending {
+    background-color: #fef9c3 !important;
+    color: #854d0e !important;
+  }
+}
+
+:host-context(body.dark) {
+  mat-chip {
+    &.chip-completed {
+      background-color: #14532d !important;
+      color: #86efac !important;
+    }
+
+    &.chip-pending {
+      background-color: #713f12 !important;
+      color: #fde047 !important;
+    }
+  }
+}
+
+// Spinning icon for processing reports
+.spin-icon {
+  animation: spin 1.4s linear infinite;
+  display: inline-block;
+  color: var(--color-text-muted);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

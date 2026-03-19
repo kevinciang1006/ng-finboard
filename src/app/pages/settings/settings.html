@@ -1,0 +1,150 @@
+<div class="page-layout">
+
+  <!-- ── Page Header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Manage your profile and application preferences</p>
+  </div>
+
+  <div class="settings-grid">
+
+    <!-- ── Section 1: Profile ─────────────────────────────────── -->
+    <mat-card appearance="outlined" class="settings-card">
+      <mat-card-content>
+        <h2 class="section-title">
+          <mat-icon class="section-icon">person</mat-icon>
+          Profile
+        </h2>
+        <mat-divider />
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form" novalidate>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="displayName" autocomplete="name" />
+            @if (profileForm.controls.displayName.hasError('required')) {
+              <mat-error>Display name is required</mat-error>
+            }
+            @if (profileForm.controls.displayName.hasError('minlength')) {
+              <mat-error>Minimum 2 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email Address</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="email" />
+            @if (profileForm.controls.email.hasError('required')) {
+              <mat-error>Email is required</mat-error>
+            }
+            @if (profileForm.controls.email.hasError('email')) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Timezone</mat-label>
+            <mat-select formControlName="timezone">
+              @for (tz of timezones; track tz.value) {
+                <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="profileForm.pristine || profileForm.invalid"
+              aria-label="Save profile changes">
+              Save Profile
+            </button>
+          </div>
+
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ── Section 2: Preferences ─────────────────────────────── -->
+    <mat-card appearance="outlined" class="settings-card">
+      <mat-card-content>
+        <h2 class="section-title">
+          <mat-icon class="section-icon">tune</mat-icon>
+          Preferences
+        </h2>
+        <mat-divider />
+
+        <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()" class="settings-form">
+
+          <!-- Theme Toggle (live — not gated by Save) -->
+          <div class="pref-group">
+            <h3 class="pref-group-label">Appearance</h3>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Dark Mode</span>
+                <span class="toggle-hint">Toggle between light and dark theme</span>
+              </div>
+              <mat-slide-toggle
+                [checked]="themeService.isDark()"
+                (change)="themeService.setDark($event.checked)"
+                aria-label="Toggle dark mode">
+              </mat-slide-toggle>
+            </div>
+          </div>
+
+          <mat-divider class="pref-divider" />
+
+          <!-- Notification Toggles (in the form) -->
+          <div class="pref-group">
+            <h3 class="pref-group-label">Notifications</h3>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Email Alerts</span>
+                <span class="toggle-hint">Receive transaction alerts via email</span>
+              </div>
+              <mat-slide-toggle
+                formControlName="emailAlerts"
+                aria-label="Enable email alerts">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Push Notifications</span>
+                <span class="toggle-hint">Browser push for critical alerts</span>
+              </div>
+              <mat-slide-toggle
+                formControlName="pushNotifications"
+                aria-label="Enable push notifications">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Monthly Digest</span>
+                <span class="toggle-hint">Monthly performance summary email</span>
+              </div>
+              <mat-slide-toggle
+                formControlName="monthlyDigest"
+                aria-label="Enable monthly digest">
+              </mat-slide-toggle>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="preferencesForm.pristine"
+              aria-label="Save preference changes">
+              Save Preferences
+            </button>
+          </div>
+
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+</div>

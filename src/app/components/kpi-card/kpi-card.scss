@@ -1,0 +1,77 @@
+:host {
+  display: block;
+}
+
+.kpi-card {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  border-radius: 12px !important;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  mat-card-content {
+    padding: 20px 24px 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.kpi-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kpi-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-prefix {
+  font-size: 1.25rem;
+  font-weight: 500;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--color-text-muted);
+}
+
+.kpi-delta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  .trend-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  .delta-label {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-left: 2px;
+  }
+
+  &.delta-positive {
+    color: #16a34a;
+  }
+
+  &.delta-negative {
+    color: #dc2626;
+  }
+}
