@@ -53,9 +53,9 @@
       <div
         class="user-avatar"
         role="img"
-        [matTooltip]="'Demo User · ' + (themeService.isDark() ? 'Dark' : 'Light') + ' mode'"
-        aria-label="Demo User avatar">
-        KC
+        [matTooltip]="authStore.displayName() + ' · ' + (themeService.isDark() ? 'Dark' : 'Light') + ' mode'"
+        [attr.aria-label]="authStore.displayName() + ' avatar'">
+        {{ authStore.userInitials() }}
       </div>
     </mat-toolbar>
 
