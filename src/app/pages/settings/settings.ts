@@ -1,20 +1,19 @@
 /**
  * SettingsComponent
  *
- * User settings page with two Reactive Form sections:
+ * User settings backed by NgRx AuthStore.
+ * On mount, loadUser() fetches the current user from the API and
+ * populates both forms via effect(). On save, updateUser() PATCHes
+ * the API and updates the global store state.
  *
- *   Section 1 — Profile: displayName, email, timezone
- *   Section 2 — Preferences: dark/light theme toggle + notification toggles
- *
- * Theme state is owned by ThemeService (singleton) so changes are reflected
- * globally across the app immediately — without waiting for "Save".
- *
- * API Integration:
- *   TODO: Replace mock form defaults with UserService.getProfile() data.
- *   TODO: Save handlers should call UserService.updateProfile() and
- *   UserService.updatePreferences().
+ * Dark mode toggle is live (no Save needed) — owned by ThemeService.
  */
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+} from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,7 +24,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ThemeService } from '../../services/theme.service';
+import { AuthStore } from '../../core/stores/auth.store';
 
 @Component({
   selector: 'app-settings',
@@ -39,47 +40,91 @@ import { ThemeService } from '../../services/theme.service';
     MatSlideToggleModule,
     MatDividerModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb       = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
-  readonly themeService = inject(ThemeService);
+  readonly themeService     = inject(ThemeService);
+  readonly authStore        = inject(AuthStore);
 
   readonly timezones = [
-    { value: 'America/New_York',    label: 'Eastern Time (ET)' },
-    { value: 'America/Chicago',     label: 'Central Time (CT)' },
-    { value: 'America/Denver',      label: 'Mountain Time (MT)' },
-    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-    { value: 'UTC',                 label: 'UTC' },
+    { value: 'America/New_York',    label: 'Eastern Time (ET)'    },
+    { value: 'America/Chicago',     label: 'Central Time (CT)'    },
+    { value: 'America/Denver',      label: 'Mountain Time (MT)'   },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)'    },
+    { value: 'Asia/Singapore',      label: 'Singapore Time (SGT)' },
+    { value: 'UTC',                 label: 'UTC'                   },
   ];
 
   // ── Profile Form ──────────────────────────────────────────────────────────
   readonly profileForm = this.fb.group({
-    displayName: ['Kevin Chang', [Validators.required, Validators.minLength(2)]],
-    email:       ['kevin@example.com', [Validators.required, Validators.email]],
-    timezone:    ['America/New_York'],
+    displayName: ['', [Validators.required, Validators.minLength(2)]],
+    email:       ['', [Validators.required, Validators.email]],
+    timezone:    ['UTC'],
   });
 
   // ── Preferences Form ──────────────────────────────────────────────────────
   readonly preferencesForm = this.fb.group({
-    emailAlerts:      [true],
-    pushNotifications:[false],
-    monthlyDigest:    [true],
+    emailAlerts:       [false],
+    pushNotifications: [false],
+    monthlyDigest:     [false],
   });
+
+  constructor() {
+    // Fetch user from API on mount
+    this.authStore.loadUser();
+
+    // Populate forms once user data arrives in the store
+    effect(() => {
+      const user = this.authStore.user();
+      if (!user) return;
+
+      this.profileForm.patchValue(
+        { displayName: user.name, email: user.email, timezone: user.timezone },
+        { emitEvent: false }
+      );
+      this.preferencesForm.patchValue(
+        {
+          emailAlerts:       user.preferences.emailAlerts,
+          pushNotifications: user.preferences.pushNotifications,
+          monthlyDigest:     user.preferences.monthlyDigest,
+        },
+        { emitEvent: false }
+      );
+
+      // Mark pristine after population so Save button stays disabled
+      this.profileForm.markAsPristine();
+      this.preferencesForm.markAsPristine();
+    });
+  }
 
   saveProfile(): void {
     if (this.profileForm.invalid) return;
-    // TODO: await UserService.updateProfile(this.profileForm.value)
+    const { displayName, email, timezone } = this.profileForm.value;
+    this.authStore.updateUser({
+      name:     displayName ?? '',
+      email:    email       ?? '',
+      timezone: timezone    ?? 'UTC',
+    });
     this.snackBar.open('Profile updated successfully', 'OK', { duration: 3000 });
     this.profileForm.markAsPristine();
   }
 
   savePreferences(): void {
-    // TODO: await UserService.updatePreferences(this.preferencesForm.value)
+    const prefs = this.preferencesForm.value;
+    this.authStore.updateUser({
+      preferences: {
+        emailAlerts:       prefs.emailAlerts       ?? false,
+        pushNotifications: prefs.pushNotifications ?? false,
+        monthlyDigest:     prefs.monthlyDigest     ?? false,
+        darkMode:          this.themeService.isDark(),
+      },
+    });
     this.snackBar.open('Preferences saved', 'OK', { duration: 3000 });
     this.preferencesForm.markAsPristine();
   }

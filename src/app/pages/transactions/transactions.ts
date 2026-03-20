@@ -1,24 +1,22 @@
 /**
  * TransactionsComponent
  *
- * Full-page transaction explorer with signal-driven filtering.
+ * Full-page transaction explorer backed by TanStack Query.
+ * Filters (status + free-text) are part of the query key, so changing
+ * either signal automatically triggers a re-fetch.
  *
- * Signals:
- *   - selectedStatus — filter by transaction status (all/completed/pending/failed)
- *   - searchQuery    — free-text search over description & category
- *   - filteredTransactions (computed) — derived from both filters
- *   - totalCount / totalAmount (computed) — summary stats
+ * Query:  ['transactions', selectedStatus, searchQuery]
+ *         → TransactionService.getAll(status, query)
  *
- * API Integration:
- *   TODO: Replace mockTransactions with TransactionService.getTransactions().
- *   For server-side filtering, pass filter params to the API instead of
- *   computing filteredTransactions on the client.
+ * Note: for a production API, debounce searchQuery before it enters the
+ * query key to avoid a round-trip on every keystroke.
  */
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
+  inject,
   signal,
 } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
@@ -27,8 +25,12 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { injectQuery } from '@tanstack/angular-query-experimental';
+import { lastValueFrom } from 'rxjs';
 import { TransactionTableComponent } from '../../components/transaction-table/transaction-table';
-import { mockTransactions } from '../../mock/transactions';
+import { TransactionService } from '../../core/services/transaction.service';
 import { Transaction } from '../../models/transaction.model';
 
 type StatusFilter = 'all' | 'completed' | 'pending' | 'failed';
@@ -42,6 +44,8 @@ type StatusFilter = 'all' | 'completed' | 'pending' | 'failed';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     TransactionTableComponent,
   ],
   templateUrl: './transactions.html',
@@ -49,44 +53,40 @@ type StatusFilter = 'all' | 'completed' | 'pending' | 'failed';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionsComponent {
-  private readonly allTransactions: Transaction[] = mockTransactions;
+  private readonly transactionService = inject(TransactionService);
 
   readonly selectedStatus = signal<StatusFilter>('all');
   readonly searchQuery = signal('');
 
-  readonly filteredTransactions = computed(() => {
-    const status = this.selectedStatus();
-    const query = this.searchQuery().toLowerCase().trim();
+  // Query key includes filter signals — auto-refetches when either changes
+  readonly transactionsQuery = injectQuery(() => ({
+    queryKey: ['transactions', this.selectedStatus(), this.searchQuery()] as const,
+    queryFn: () =>
+      lastValueFrom(
+        this.transactionService.getAll(this.selectedStatus(), this.searchQuery())
+      ),
+  }));
 
-    return this.allTransactions.filter((t) => {
-      const matchesStatus = status === 'all' || t.status === status;
-      const matchesSearch =
-        !query ||
-        t.description.toLowerCase().includes(query) ||
-        t.category.toLowerCase().includes(query);
-      return matchesStatus && matchesSearch;
-    });
-  });
+  readonly transactions = computed<Transaction[]>(
+    () => this.transactionsQuery.data() ?? []
+  );
 
-  readonly totalCount = computed(() => this.filteredTransactions().length);
-
+  readonly totalCount  = computed(() => this.transactions().length);
   readonly totalAmount = computed(() =>
-    this.filteredTransactions().reduce((sum, t) => sum + t.amount, 0)
+    this.transactions().reduce((sum, t) => sum + t.amount, 0)
   );
 
   constructor() {
-    // Demonstrates effect() usage: logs filter state on every change
     effect(() => {
       console.log('[TransactionsComponent] Filters changed:', {
-        status: this.selectedStatus(),
-        query: this.searchQuery(),
-        results: this.filteredTransactions().length,
+        status:  this.selectedStatus(),
+        query:   this.searchQuery(),
+        results: this.transactions().length,
       });
     });
   }
 
   onRowClicked(transaction: Transaction): void {
-    // TODO: Open transaction detail panel / drawer
     console.log('[TransactionsComponent] Row clicked:', transaction.id);
   }
 }
