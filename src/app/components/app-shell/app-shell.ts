@@ -32,6 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ThemeService } from '../../services/theme.service';
+import { AuthStore } from '../../core/stores/auth.store';
 
 interface NavItem {
   label: string;
@@ -76,6 +77,7 @@ const PAGE_TITLES: Record<string, string> = {
 export class AppShellComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
   readonly themeService = inject(ThemeService);
+  readonly authStore    = inject(AuthStore);
 
   readonly navItems = NAV_ITEMS;
   readonly sidenavOpened = signal(true);
@@ -105,10 +107,21 @@ export class AppShellComponent {
   readonly isMobile = computed(() => this.mobileBreakpoint() ?? false);
 
   constructor() {
+    // Load user into the global store on app start
+    this.authStore.loadUser();
+
     // Auto-collapse sidebar when viewport enters mobile breakpoint
     effect(() => {
       if (this.isMobile()) {
         this.sidenavOpened.set(false);
+      }
+    });
+
+    // Restore persisted dark-mode preference once user data arrives
+    effect(() => {
+      const user = this.authStore.user();
+      if (user) {
+        this.themeService.applyDark(user.preferences.darkMode ?? false);
       }
     });
   }

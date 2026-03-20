@@ -215,6 +215,66 @@ All mock data lives in `/src/app/mock/` and is clearly annotated with `// TODO:`
 
 ---
 
+## API & Local Backend
+
+This project uses **[json-server](https://github.com/typicode/json-server)** as a zero-config REST API for local development. All data lives in `server/db.json`.
+
+### Running both servers
+
+```bash
+# Terminal 1 — mock REST API on http://localhost:3000
+npm run server
+
+# Terminal 2 — Angular dev server on http://localhost:4200
+npm start
+```
+
+### Available endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/transactions` | All transactions (supports `?status=` and `?q=` filters) |
+| `GET` | `/portfolio` | Portfolio summary, allocation, and monthly returns |
+| `GET` | `/reports` | All reports |
+| `POST` | `/reports` | Create a new report |
+| `GET` | `/user` | Current user profile + preferences |
+| `PATCH` | `/user` | Update user profile / preferences |
+
+### Backend deployment (Railway)
+
+A `Procfile` is included for deploying json-server to [Railway](https://railway.app/).
+After deploying, update `src/environments/environment.prod.ts` with your Railway URL.
+
+---
+
+## Architecture
+
+| Concern | Technology |
+|---|---|
+| Data fetching & caching | **TanStack Query** (`@tanstack/angular-query-experimental`) |
+| Global user / auth state | **NgRx SignalStore** (`@ngrx/signals`) |
+| HTTP client | `HttpClient` with `withFetch()` |
+| Environment config | `src/environments/environment.ts` (swapped for `.prod.ts` at build time) |
+
+### Data flow
+
+```
+json-server (port 3000)
+    ↓  HttpClient
+TransactionService / PortfolioService / ReportsService / UserService
+    ↓  Observable → lastValueFrom()
+TanStack injectQuery / injectMutation        NgRx AuthStore
+    ↓  signal-based query results               ↓  signalStore state
+TransactionsComponent                    AppShellComponent
+PortfolioComponent                       SettingsComponent
+ReportsComponent
+```
+
+- **TanStack Query** handles loading/error/success states, caching (5-minute stale time), automatic re-fetch on filter changes, and cache invalidation after mutations.
+- **NgRx SignalStore** (`AuthStore`) owns user/profile state globally — loaded once at app start in `AppShellComponent`, read in `SettingsComponent` and the top-bar avatar.
+
+---
+
 ## Deployment
 
 This project is automatically deployed to **GitHub Pages** on every push to `main`.

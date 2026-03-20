@@ -36,23 +36,48 @@
 
   </div>
 
-  <!-- ── Summary Stats ────────────────────────────────────────── -->
-  <div class="summary-row" role="status" aria-live="polite">
-    <span class="summary-stat">
-      <strong>{{ totalCount() }}</strong> transaction{{ totalCount() === 1 ? '' : 's' }}
-    </span>
-    <span class="summary-divider" aria-hidden="true">·</span>
-    <span
-      class="summary-stat"
-      [class.amount-positive]="totalAmount() >= 0"
-      [class.amount-negative]="totalAmount() < 0">
-      Net: <strong>{{ totalAmount() | currency:'USD':'symbol':'1.2-2' }}</strong>
-    </span>
-  </div>
+  <!-- ── Loading State ────────────────────────────────────────── -->
+  @if (transactionsQuery.isPending()) {
+    <div class="state-container" role="status" aria-label="Loading transactions">
+      <mat-spinner diameter="40" />
+      <p class="state-message">Loading transactions…</p>
+    </div>
+  }
 
-  <!-- ── Transaction Table ────────────────────────────────────── -->
-  <app-transaction-table
-    [transactions]="filteredTransactions()"
-    (rowClicked)="onRowClicked($event)" />
+  <!-- ── Error State ──────────────────────────────────────────── -->
+  @if (transactionsQuery.isError()) {
+    <div class="state-container state-error" role="alert">
+      <mat-icon class="state-icon">error_outline</mat-icon>
+      <p class="state-message">Failed to load transactions.</p>
+      <button mat-flat-button (click)="transactionsQuery.refetch()" aria-label="Retry loading transactions">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- ── Success State ────────────────────────────────────────── -->
+  @if (transactionsQuery.isSuccess()) {
+
+    <!-- Summary Stats -->
+    <div class="summary-row" role="status" aria-live="polite">
+      <span class="summary-stat">
+        <strong>{{ totalCount() }}</strong> transaction{{ totalCount() === 1 ? '' : 's' }}
+      </span>
+      <span class="summary-divider" aria-hidden="true">·</span>
+      <span
+        class="summary-stat"
+        [class.amount-positive]="totalAmount() >= 0"
+        [class.amount-negative]="totalAmount() < 0">
+        Net: <strong>{{ totalAmount() | currency:'USD':'symbol':'1.2-2' }}</strong>
+      </span>
+    </div>
+
+    <!-- Transaction Table -->
+    <app-transaction-table
+      [transactions]="transactions()"
+      (rowClicked)="onRowClicked($event)" />
+
+  }
 
 </div>

@@ -2,6 +2,6 @@ export interface Report {
   id: string;
   name: string;
   period: string;
-  generated_date: Date;
+  generatedDate: string; // ISO 8601 string from API
   status: 'ready' | 'processing';
 }

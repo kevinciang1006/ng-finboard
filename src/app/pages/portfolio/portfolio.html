@@ -3,12 +3,35 @@
   <!-- ── Page Header ──────────────────────────────────────────── -->
   <div class="page-header">
     <h1 class="page-title">Portfolio</h1>
-    <p class="page-subtitle">Real-time performance overview — mock data</p>
+    <p class="page-subtitle">Real-time performance overview</p>
   </div>
+
+  <!-- ── Loading State ────────────────────────────────────────── -->
+  @if (portfolioQuery.isPending()) {
+    <div class="state-container" role="status" aria-label="Loading portfolio data">
+      <mat-spinner diameter="40" />
+      <p class="state-message">Loading portfolio data…</p>
+    </div>
+  }
+
+  <!-- ── Error State ──────────────────────────────────────────── -->
+  @if (portfolioQuery.isError()) {
+    <div class="state-container state-error" role="alert">
+      <mat-icon class="state-icon">error_outline</mat-icon>
+      <p class="state-message">Failed to load portfolio data.</p>
+      <button mat-flat-button (click)="portfolioQuery.refetch()" aria-label="Retry loading portfolio">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- ── Success State ────────────────────────────────────────── -->
+  @if (portfolioQuery.isSuccess()) {
 
   <!-- ── KPI Row ──────────────────────────────────────────────── -->
   <div class="kpi-grid">
-    @for (kpi of kpiCards; track kpi.label) {
+    @for (kpi of kpiCards(); track kpi.label) {
       <app-kpi-card
         [label]="kpi.label"
         [value]="kpi.value"
@@ -57,5 +80,7 @@
     </div>
 
   </div>
+
+  } <!-- end @if isSuccess -->
 
 </div>
