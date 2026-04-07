@@ -1,20 +1,19 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { User } from '../../models/user.model';
-import { environment } from '../../../environments/environment';
+import { MOCK_USER } from '../../mock-data/user.mock';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/user`;
+  private readonly user = signal<User>({ ...MOCK_USER });
 
   getUser(): Observable<User> {
-    return this.http.get<User>(this.baseUrl);
+    return of(this.user());
   }
 
-  /** PATCH partial user fields (profile + preferences). */
+  /** Applies partial updates in-memory. */
   updateUser(updates: Partial<User>): Observable<User> {
-    return this.http.patch<User>(this.baseUrl, updates);
+    this.user.update((current) => ({ ...current, ...updates }));
+    return of(this.user());
   }
 }

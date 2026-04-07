@@ -54,6 +54,8 @@ npm start
 npm run build
 ```
 
+> No backend process needed — all data is served from static mock files in `src/app/mock-data/`.
+
 ---
 
 ## Project Structure
@@ -215,35 +217,18 @@ All mock data lives in `/src/app/mock/` and is clearly annotated with `// TODO:`
 
 ---
 
-## API & Local Backend
+## Mock Data
 
-This project uses **[json-server](https://github.com/typicode/json-server)** as a zero-config REST API for local development. All data lives in `server/db.json`.
+All mock data lives in `src/app/mock-data/` and is served via `of()` — no backend needed.
 
-### Running both servers
+| File | Contents |
+|---|---|
+| `transactions.mock.ts` | 20 sample investment transactions |
+| `portfolio.mock.ts` | Portfolio summary, allocation, and monthly returns |
+| `reports.mock.ts` | 5 sample reports |
+| `user.mock.ts` | User profile and preferences |
 
-```bash
-# Terminal 1 — mock REST API on http://localhost:3000
-npm run server
-
-# Terminal 2 — Angular dev server on http://localhost:4200
-npm start
-```
-
-### Available endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/transactions` | All transactions (supports `?status=` and `?q=` filters) |
-| `GET` | `/portfolio` | Portfolio summary, allocation, and monthly returns |
-| `GET` | `/reports` | All reports |
-| `POST` | `/reports` | Create a new report |
-| `GET` | `/user` | Current user profile + preferences |
-| `PATCH` | `/user` | Update user profile / preferences |
-
-### Backend deployment (Railway)
-
-A `Procfile` is included for deploying json-server to [Railway](https://railway.app/).
-After deploying, update `src/environments/environment.prod.ts` with your Railway URL.
+To swap in a real API, replace the `of(MOCK_*)` calls in each service with `HttpClient` calls.
 
 ---
 
@@ -253,14 +238,13 @@ After deploying, update `src/environments/environment.prod.ts` with your Railway
 |---|---|
 | Data fetching & caching | **TanStack Query** (`@tanstack/angular-query-experimental`) |
 | Global user / auth state | **NgRx SignalStore** (`@ngrx/signals`) |
-| HTTP client | `HttpClient` with `withFetch()` |
-| Environment config | `src/environments/environment.ts` (swapped for `.prod.ts` at build time) |
+| Mock data | Static `.ts` files in `src/app/mock-data/`, returned via `of()` |
 
 ### Data flow
 
 ```
-json-server (port 3000)
-    ↓  HttpClient
+src/app/mock-data/ (static TypeScript files)
+    ↓  of()
 TransactionService / PortfolioService / ReportsService / UserService
     ↓  Observable → lastValueFrom()
 TanStack injectQuery / injectMutation        NgRx AuthStore

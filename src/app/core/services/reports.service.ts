@@ -1,27 +1,27 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { Report } from '../../models/report.model';
-import { environment } from '../../../environments/environment';
+import { MOCK_REPORTS } from '../../mock-data/reports.mock';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/reports`;
+  private readonly reports = signal<Report[]>([...MOCK_REPORTS]);
 
   getAll(): Observable<Report[]> {
-    return this.http.get<Report[]>(this.baseUrl);
+    return of(this.reports());
   }
 
-  /** POST a new report with status 'processing'. */
+  /** Creates a new report in-memory with status 'processing'. */
   generateReport(): Observable<Report> {
     const next = Math.floor(Math.random() * 900) + 100;
-    const newReport: Omit<Report, 'id'> = {
+    const newReport: Report = {
+      id: `RPT-${next}`,
       name: `Custom Report RPT-${next}`,
       period: 'Q1 2026',
       generatedDate: new Date().toISOString(),
       status: 'processing',
     };
-    return this.http.post<Report>(this.baseUrl, newReport);
+    this.reports.update((list) => [...list, newReport]);
+    return of(newReport);
   }
 }
