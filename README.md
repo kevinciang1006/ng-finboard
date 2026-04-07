@@ -2,7 +2,7 @@
 
 **Financial Dashboard Component Library** — a portfolio demo showcasing Angular 21 enterprise UI patterns.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blue)](https://kevinciang.github.io/ng-finboard)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-blue)](https://kevinciang.github.io/ng-finboard) test
 
 ---
 
