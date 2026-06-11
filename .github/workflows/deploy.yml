@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build for production
-        run: npx @angular/cli@21 build --base-href /ng-finboard/
+        run: npx @angular/cli@21 build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
